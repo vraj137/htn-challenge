@@ -12,6 +12,39 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+.arrow-down {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.arrow-down::after {
+  content: "";
+  width: 0;
+  height: 0;
+  position: absolute;
+  margin: auto;
+  margin-bottom: 2px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid #fff;
+  transform: rotate(0deg);
+  animation: arrow 2.5s infinite ease;
+}
+
+@keyframes arrow {
+  0%, 100% {
+    margin-bottom: 10px;
+  }
+  50% {
+    margin-bottom: 50px;
+  }
+}
+
 
 .App-header {
   background-color: #282c34;
@@ -36,3 +69,23 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes fade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.changing-word {
+  animation-name: fade;
+  animation-duration: 2.5s;
+  animation-timing-function: ease-in-out;
+  transition: color 0.7s;
+}
+
