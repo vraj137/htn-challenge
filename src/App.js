@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import Modal from "react-modal";
 import { Input } from "@chakra-ui/react";
-import { LockIcon } from '@chakra-ui/icons';
+
 
 
 function App(props) {
@@ -101,6 +101,73 @@ function App(props) {
             </Select>
           </Box>
         </Flex>
+
+        {!loggedIn && (
+        <Button size="lg" margin="10" onClick={openModal}>
+          Log In To View All Events!
+        </Button>
+      )}
+
+      {loggedIn && (
+        <Button margin="10" onClick={handleLogout}>
+          Log Out
+        </Button>
+      )}
+
+      <Modal isOpen={isOpen} onRequestClose={closeModal}>
+        {!loggedIn && (
+          <form onSubmit={handleLogin}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "25vh",
+              }}
+            >
+              <h2>Login</h2>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <label>
+                Username:
+                <Input
+                  pr="4.5rem"
+                  placeholder="Enter myusername"
+                  type={"username"}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  mt="3"
+                />
+              </label>
+              <label>
+                Password:
+                <Input
+                  mt="3"
+                  pr="4.5rem"
+                  type={"password"}
+                  placeholder="Enter mypassword"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </label>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "5vh",
+              }}
+            >
+              <Button type="submit">Log In</Button>
+            </div>
+          </form>
+        )}
+      </Modal>
 
           <Flex mt = "4" flexWrap="wrap" flexDirection="row" justifyContent="center">
             {filteredEvents
@@ -227,72 +294,6 @@ function App(props) {
         </Card>
       </Box>
 
-      {!loggedIn && (
-        <><LockIcon></LockIcon><Button size="lg" margin="10" onClick={openModal}>
-          View More!
-        </Button></>
-      )}
-
-      {loggedIn && (
-        <Button margin="10" onClick={handleLogout}>
-          Log Out
-        </Button>
-      )}
-
-      <Modal isOpen={isOpen} onRequestClose={closeModal}>
-        {!loggedIn && (
-          <form onSubmit={handleLogin}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: "25vh",
-              }}
-            >
-              <h2>Login</h2>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <label>
-                Username:
-                <Input
-                  pr="4.5rem"
-                  placeholder="Enter myusername"
-                  type={"username"}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  mt="3"
-                />
-              </label>
-              <label>
-                Password:
-                <Input
-                  mt="3"
-                  pr="4.5rem"
-                  type={"password"}
-                  placeholder="Enter mypassword"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </label>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: "5vh",
-              }}
-            >
-              <Button type="submit">Log In</Button>
-            </div>
-          </form>
-        )}
-      </Modal>
     </div>
   );
 }
