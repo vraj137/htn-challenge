@@ -4,47 +4,48 @@ import {
   Box,
   Card,
   CardHeader,
-  CardBody,
-  Table,
-  Tbody,
   Text,
-  Stack,
+  Button,
+  Badge,
+  Flex,
+  Select,
+
   // Th,
   // Thead,
   // Tr,
 } from "@chakra-ui/react";
+import Modal from "react-modal";
+import { Input } from "@chakra-ui/react";
+import { LockIcon } from '@chakra-ui/icons';
 
 
-function App() {
+function App(props) {
   const [events, setEvents] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [eventType, setEventType] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const eventTypes = [...new Set(events.map(event => event.event_type))];
 
-  const [showTypingAnimation, setShowTypingAnimation] = useState(true);
 
-  const [wordIndex, setWordIndex] = useState(0);
-  const [word, setWord] = useState("code");
+  function openModal() {
+    setIsOpen(true);
+  }
 
-  useEffect(() => {
-    const words = ["design", "learning", "building"];
+  function closeModal() {
+    setIsOpen(false);
+  }
 
-    const interval = setInterval(() => {
-      setWordIndex((wordIndex + 1) % words.length);
-      setWord(words[wordIndex]);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [wordIndex]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTypingAnimation(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  const filteredEvents = events.filter(event => {
+    if (!eventType) {
+      return true;
+    }
+    return event.event_type === eventType;
+  });
 
   useEffect(() => {
-    document.title = "Hackathon Global Inc."; // Set the tab title
+    document.title = "2021 Hackathon Global Inc."; // Set the tab title
   }, []);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ function App() {
     event.preventDefault();
     if (username === "myusername" && password === "mypassword") {
       setLoggedIn(true);
+      closeModal();
     } else {
       alert("Invalid login details");
     }
@@ -66,6 +68,7 @@ function App() {
 
   function handleLogout() {
     setLoggedIn(false);
+    closeModal();
   }
 
   function capitalizeEventType(eventType) {
@@ -77,146 +80,219 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={"hackthenorth.png"} alt="logo" width="50" height="50" />
-        {showTypingAnimation ? (
-          <TypingAnimation text="Hackathon Global Inc." />
-        ) : (
-          <h1>Hackathon Global Inc.</h1>
-        )}
-        <div class="arrow-down"></div>
-        <p>
-          Canada's biggest hackathon where anyone can spark their passion for{" "}
-          <span key={word} className="changing-word">
-            {word}
-          </span>
-        </p>
-        <p>September 16-18, 2023</p>
-        <p>In-Person event @ Waterloo, ON</p>
-      </header>
-      <table>
-        <Box className="content" p="2rem">
-          <Card>
-            <CardHeader>
-              <h2>All Events</h2>
-            </CardHeader>
-            <CardBody>
-              <Table variant="simple">
-                <Tbody>
-                  {events
-                    .sort((a, b) => a.start_time - b.start_time)
-                    .map((event) => {
-                      const showPrivateEvent =
-                        loggedIn && event.permission === "private";
-                      const showRelatedEvents =
-                        event.permission === "public" || showPrivateEvent;
+      <Box className="content" p="2rem">
+        <Card>
+          <CardHeader>
+            <h2 style={{ fontWeight: "bold", fontSize: "30px" }}>
+              2021 Upcoming Events @ Hackathon Global Inc.
+            </h2>
+          </CardHeader>
 
-                      if (!showPrivateEvent && event.permission === "private") {
-                        return null;
-                      }
+          <Flex justifyContent="center" mt="2">
+          <Box mr="2">
+            <Text fontWeight="bold">Filter by Event Type:</Text>
+          </Box>
+          <Box w="40%">
+            <Select value={eventType} onChange={e => setEventType(e.target.value)}>
+              <option value="">All</option>
+              {eventTypes.map(eventType => (
+                <option key={eventType} value={eventType}>{eventType}</option>
+              ))}
+            </Select>
+          </Box>
+        </Flex>
 
-                      return (
-                        <Card key={event.id} maxW = 'sm'>
-                          <CardBody>
-                          <CardHeader>
-                            <h2>{event.name}</h2>
-                          </CardHeader>
-                            <Box mt="2" mb="4">
-                              <Text fontWeight="bold">Event Type:</Text>
-                              <Stack mt='6' spacing='3'></Stack>
-                              <Text>
-                                {capitalizeEventType(event.event_type)}
-                              </Text>
-                            </Box>
-                            <Box mb="4">
-                              <Text fontWeight="bold">Start Time:</Text>
-                              <Text>
-                                {new Date(event.start_time).toLocaleString()}
-                              </Text>
-                            </Box>
-                            <Box mb="4">
-                              <Text fontWeight="bold">End Time:</Text>
-                              <Text>
-                                {new Date(event.end_time).toLocaleString()}
-                              </Text>
-                            </Box>
-                            <Box mb="4">
-                              <Text fontWeight="bold">Description:</Text>
-                              <Text>{event.description}</Text>
-                            </Box>
-                            <Box mb="4">
-                              <Text fontWeight="bold">Speakers:</Text>
-                              <Text>
-                                {event.speakers
-                                  .map((speaker) => speaker.name)
-                                  .join(", ")}
-                              </Text>
-                            </Box>
-                            {showRelatedEvents && (
-                              <Box mb="4">
-                                <Text fontWeight="bold">Related Events:</Text>
-                                {event.related_events.map((relatedEventId) => {
-                                  const relatedEvent = events.find(
-                                    (e) => e.id === relatedEventId
-                                  );
-                                  return (
-                                    <div key={relatedEvent.id}>
-                                      <RelatedEvent
-                                        name={relatedEvent.name}
-                                        id={relatedEvent.id}
-                                      />
-                                      <br />
-                                    </div>
-                                  );
-                                })}
-                              </Box>
-                            )}
-                            <Box mb="4">
-                              <Text fontWeight="bold">Event URL:</Text>
-                              <Text>
-                                {showPrivateEvent
-                                  ? event.private_url
-                                  : event.public_url}
-                              </Text>
-                            </Box>
-                          </CardBody>
-                        </Card>
-                      );
-                    })}
-                </Tbody>
-              </Table>
-            </CardBody>
-          </Card>
-        </Box>
-      </table>
+          <Flex mt = "4" flexWrap="wrap" flexDirection="row" justifyContent="center">
+            {filteredEvents
+              .sort((a, b) => a.start_time - b.start_time)
+              .map((event) => {
+                const showPrivateEvent =
+                  loggedIn && event.permission === "private";
+                const showRelatedEvents =
+                  event.permission === "public" || showPrivateEvent;
+
+                if (!showPrivateEvent && event.permission === "private") {
+                  return null;
+                }
+
+                return (
+                  <Box
+                    key={event.id}
+                    mb="4"
+                    mx="2"
+                    width={["100%"]}
+                    maxW="sm"
+                    borderWidth="2px"
+                    borderRadius="lg"
+                    overflow="hidden"
+                  >
+                    <Box p="6">
+                      <Box d="flex" alignItems="baseline">
+                        <Badge
+                          size="lg"
+                          borderRadius="full"
+                          px="2"
+                          colorScheme="teal"
+                        >
+                          {capitalizeEventType(event.name)}
+                        </Badge>
+                      </Box>
+                      <Box mt="1" as="h4" lineHeight="tight">
+                        <Text fontWeight="bold">
+                          Event Type: 
+                        </Text>
+                        <Text color ="gray.500">
+                        {capitalizeEventType(event.event_type)}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text mt="2" color="gray.500">
+                          <Text>
+                            Start: {new Date(event.start_time).toLocaleString()}
+                          </Text>
+                          <Text>
+                            End: {new Date(event.end_time).toLocaleString()}
+                          </Text>
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text mt="2" color="gray.500">
+                          <Text color="black" fontWeight="bold">
+                            Description:
+                          </Text>
+                          {event.description}
+                        </Text>
+                      </Box>
+                      {event.speakers && event.speakers.length > 0 && (
+                        <Box>
+                          <Text mt="2" color="gray.500">
+                            <Text color="black" fontWeight="bold">
+                              Speakers:
+                            </Text>
+                            {event.speakers
+                              .map((speaker) => speaker.name)
+                              .join(", ")}
+                          </Text>
+                        </Box>
+                      )}
+
+                      {showRelatedEvents && event.related_events.length > 0 && (
+                        <Box>
+                          <Text mt="2" color="black" fontWeight="bold">
+                            Related Events:
+                          </Text>
+
+                          {event.related_events.map((relatedEventId) => {
+                            const relatedEvent = events.find(
+                              (e) => e.id === relatedEventId
+                            );
+                            return (
+                              <div key={relatedEvent.id}>
+                                <Badge
+                                  size="lg"
+                                  borderRadius="full"
+                                  px="2"
+                                  colorScheme="pink"
+                                >
+                                  <RelatedEvent
+                                    name={relatedEvent.name}
+                                    id={relatedEvent.id}
+                                  />
+                                </Badge>
+                              </div>
+                            );
+                          })}
+                        </Box>
+                      )}
+                      <Box>
+                        <Text fontWeight="bold" mt="2" color="black">
+                          Event URL:
+                        </Text>
+                        <Button
+                          mt="2"
+                          onClick={() =>
+                            (window.location.href = showPrivateEvent
+                              ? event.private_url
+                              : event.public_url)
+                          }
+                        >
+                          Click Me!
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+          </Flex>
+        </Card>
+      </Box>
+
       {!loggedIn && (
-        <form onSubmit={handleLogin}>
-          <h2>Login</h2>
-          <label>
-            Username:
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </label>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-          <button type="submit">Log In</button>
-        </form>
+        <><LockIcon></LockIcon><Button size="lg" margin="10" onClick={openModal}>
+          View More!
+        </Button></>
       )}
+
       {loggedIn && (
-        <div>
-          <h2>Logged in as {username}</h2>
-          <button onClick={handleLogout}>Log Out</button>
-        </div>
+        <Button margin="10" onClick={handleLogout}>
+          Log Out
+        </Button>
       )}
+
+      <Modal isOpen={isOpen} onRequestClose={closeModal}>
+        {!loggedIn && (
+          <form onSubmit={handleLogin}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "25vh",
+              }}
+            >
+              <h2>Login</h2>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <label>
+                Username:
+                <Input
+                  pr="4.5rem"
+                  placeholder="Enter myusername"
+                  type={"username"}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  mt="3"
+                />
+              </label>
+              <label>
+                Password:
+                <Input
+                  mt="3"
+                  pr="4.5rem"
+                  type={"password"}
+                  placeholder="Enter mypassword"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </label>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "5vh",
+              }}
+            >
+              <Button type="submit">Log In</Button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }
@@ -227,23 +303,6 @@ function RelatedEvent(props) {
       {props.name}
     </a>
   );
-}
-
-function TypingAnimation({ text }) {
-  const [animationText, setAnimationText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (currentIndex < text.length) {
-        setAnimationText(text.slice(0, currentIndex + 1));
-        setCurrentIndex(currentIndex + 1);
-      }
-    }, 100);
-    return () => clearInterval(timer);
-  }, [text, currentIndex]);
-
-  return <h1>{animationText}</h1>;
 }
 
 export default App;
