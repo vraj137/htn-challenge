@@ -15,6 +15,7 @@ import { Input } from "@chakra-ui/react";
 
 function App(props) {
 
+  
   // const declarations 
   const [events, setEvents] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -190,7 +191,7 @@ function App(props) {
               </form>
             )}
           </Modal>
-          
+
           {/* allows the events to be sorted based on the data and time and shows only the ones that are public to regular users and private + public events if users are logged in*/}
           <Flex
             mt="4"
