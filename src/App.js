@@ -13,10 +13,15 @@ import {
 import Modal from "react-modal";
 import { Input } from "@chakra-ui/react";
 
-function App(props) {
+function RelatedEvent(props) {
+  return (
+    <a href={`https://api.hackthenorth.com/v3/events/${props.id}`}>
+      {props.name}
+    </a>
+  );
+}
 
-  
-  // const declarations 
+function App(props) {
   const [events, setEvents] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
@@ -25,39 +30,25 @@ function App(props) {
   const [isOpen, setIsOpen] = useState(false);
   const eventTypes = [...new Set(events.map((event) => event.event_type))];
 
-  // login modal opens when logging in or logging out 
   function openModal() {
     setIsOpen(true);
   }
 
-  // close modal after logged in or out
   function closeModal() {
     setIsOpen(false);
   }
 
-  // related events from link 
-  function RelatedEvent(props) {
-    return (
-      <a href={`https://api.hackthenorth.com/v3/events/${props.id}`}>
-        {props.name}
-      </a>
-    );
+  function capitalizeEventType(eventType) {
+    if (eventType.includes("_")) {
+      eventType = eventType.replace("_", " ");
+    }
+    return eventType.toUpperCase();
   }
 
-  // filter events
-  const filteredEvents = events.filter((event) => {
-    if (!eventType) {
-      return true;
-    }
-    return event.event_type === eventType;
-  });
-
-    // tab title 
   useEffect(() => {
-    document.title = "2021 Hackathon Global Inc."; // Set the tab title
+    document.title = "Hackathon Global Inc.™";
   }, []);
 
-  // gets events from link
   useEffect(() => {
     fetch("https://api.hackthenorth.com/v3/events")
       .then((response) => response.json())
@@ -66,7 +57,6 @@ function App(props) {
       });
   }, []);
 
-  // handles log in 
   function handleLogin(event) {
     event.preventDefault();
     if (username === "myusername" && password === "mypassword") {
@@ -77,31 +67,27 @@ function App(props) {
     }
   }
 
-  // handles logout 
   function handleLogout() {
     setLoggedIn(false);
     closeModal();
   }
-  // capitalize event type and remove _ (underscore)
-  function capitalizeEventType(eventType) {
-    if (eventType.includes("_")) {
-      eventType = eventType.replace("_", " ");
+
+  const filteredEvents = events.filter((event) => {
+    if (!eventType) {
+      return true;
     }
-    return eventType.toUpperCase();
-  }
+    return event.event_type === eventType;
+  });
 
   return (
     <div className="App">
       <Box className="content" p="2rem">
         <Card>
-          {/* title of the page */}
           <CardHeader>
             <h2 style={{ fontWeight: "bold", fontSize: "30px" }}>
-              2021 Upcoming Events @ Hackathon Global Inc.
+            Hackathon Global Inc.™
             </h2>
           </CardHeader>
-
-          {/* Filter options box */}
           <Flex justifyContent="center" mt="2">
             <Box mr="2">
               <Text fontWeight="bold">Filter by Event Type:</Text>
@@ -114,14 +100,12 @@ function App(props) {
                 <option value="">All</option>
                 {eventTypes.map((eventType) => (
                   <option key={eventType} value={eventType}>
-                    {eventType}
+                    {capitalizeEventType(eventType)}
                   </option>
                 ))}
               </Select>
             </Box>
           </Flex>
-
-          {/* Allows users to log in or log out depending on their status  */}
           {!loggedIn && (
             <Button size="lg" margin="10" onClick={openModal}>
               Log In To View All Events!
@@ -134,7 +118,6 @@ function App(props) {
             </Button>
           )}
 
-          {/* checks to see when the modal is open and needs to be closed */}
           <Modal isOpen={isOpen} onRequestClose={closeModal}>
             {!loggedIn && (
               <form onSubmit={handleLogin}>
@@ -154,7 +137,6 @@ function App(props) {
                     alignItems: "center",
                   }}
                 >
-                  {/* user inputs for login */}
                   <label>
                     Username:
                     <Input
@@ -185,14 +167,12 @@ function App(props) {
                     marginTop: "5vh",
                   }}
                 >
-                  {/* log in button  */}
                   <Button type="submit">Log In</Button>
                 </div>
               </form>
             )}
           </Modal>
 
-          {/* allows the events to be sorted based on the data and time and shows only the ones that are public to regular users and private + public events if users are logged in*/}
           <Flex
             mt="4"
             flexWrap="wrap"
@@ -202,7 +182,6 @@ function App(props) {
             {filteredEvents
               .sort((a, b) => a.start_time - b.start_time)
               .map((event) => {
-                // checks to see the permission for the events from the link
                 const showPrivateEvent =
                   loggedIn && event.permission === "private";
                 const showRelatedEvents =
@@ -324,6 +303,5 @@ function App(props) {
     </div>
   );
 }
-
 
 export default App;
